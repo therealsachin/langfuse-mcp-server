@@ -23,6 +23,13 @@ import { getObservations, getObservationsSchema } from './tools/get-observations
 import { getCostAnalysis, getCostAnalysisSchema } from './tools/get-cost-analysis.js';
 import { getDailyMetrics, getDailyMetricsSchema } from './tools/get-daily-metrics.js';
 import { getProjects, getProjectsSchema } from './tools/get-projects.js';
+// Additional API tools
+import { getObservationDetail, getObservationDetailSchema } from './tools/get-observation-detail.js';
+import { getHealthStatus, getHealthStatusSchema } from './tools/get-health-status.js';
+import { listModels, listModelsSchema } from './tools/list-models.js';
+import { getModelDetail, getModelDetailSchema } from './tools/get-model-detail.js';
+import { listPrompts, listPromptsSchema } from './tools/list-prompts.js';
+import { getPromptDetail, getPromptDetailSchema } from './tools/get-prompt-detail.js';
 
 class LangfuseAnalyticsServer {
   private server: Server;
@@ -439,6 +446,103 @@ class LangfuseAnalyticsServer {
             required: ['from', 'to'],
           },
         },
+        // Additional API tools
+        {
+          name: 'get_observation_detail',
+          description: 'Get detailed information about a specific observation by ID.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              observationId: {
+                type: 'string',
+                description: 'The observation ID to retrieve detailed information for',
+              },
+            },
+            required: ['observationId'],
+          },
+        },
+        {
+          name: 'get_health_status',
+          description: 'Get system health status and availability information.',
+          inputSchema: {
+            type: 'object',
+            properties: {},
+          },
+        },
+        {
+          name: 'list_models',
+          description: 'List all available AI models in the Langfuse project.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              limit: {
+                type: 'number',
+                description: 'Maximum number of models to return (default: 50)',
+              },
+              page: {
+                type: 'number',
+                description: 'Page number for pagination',
+              },
+            },
+          },
+        },
+        {
+          name: 'get_model_detail',
+          description: 'Get detailed information about a specific AI model.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              modelId: {
+                type: 'string',
+                description: 'The model ID to retrieve detailed information for',
+              },
+            },
+            required: ['modelId'],
+          },
+        },
+        {
+          name: 'list_prompts',
+          description: 'List all prompt templates in the Langfuse project.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              limit: {
+                type: 'number',
+                description: 'Maximum number of prompts to return (default: 50)',
+              },
+              page: {
+                type: 'number',
+                description: 'Page number for pagination',
+              },
+              name: {
+                type: 'string',
+                description: 'Filter by prompt name (substring match)',
+              },
+            },
+          },
+        },
+        {
+          name: 'get_prompt_detail',
+          description: 'Get detailed information about a specific prompt template.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              promptName: {
+                type: 'string',
+                description: 'The prompt name to retrieve',
+              },
+              version: {
+                type: 'number',
+                description: 'Specific version to retrieve (if not provided, gets latest)',
+              },
+              label: {
+                type: 'string',
+                description: 'Specific label to retrieve',
+              },
+            },
+            required: ['promptName'],
+          },
+        },
       ],
     }));
 
@@ -505,6 +609,37 @@ class LangfuseAnalyticsServer {
           case 'get_daily_metrics': {
             const args = getDailyMetricsSchema.parse(request.params.arguments);
             return await getDailyMetrics(this.client, args);
+          }
+
+          // Additional API tools
+          case 'get_observation_detail': {
+            const args = getObservationDetailSchema.parse(request.params.arguments);
+            return await getObservationDetail(this.client, args);
+          }
+
+          case 'get_health_status': {
+            const args = getHealthStatusSchema.parse(request.params.arguments);
+            return await getHealthStatus(this.client, args);
+          }
+
+          case 'list_models': {
+            const args = listModelsSchema.parse(request.params.arguments);
+            return await listModels(this.client, args);
+          }
+
+          case 'get_model_detail': {
+            const args = getModelDetailSchema.parse(request.params.arguments);
+            return await getModelDetail(this.client, args);
+          }
+
+          case 'list_prompts': {
+            const args = listPromptsSchema.parse(request.params.arguments);
+            return await listPrompts(this.client, args);
+          }
+
+          case 'get_prompt_detail': {
+            const args = getPromptDetailSchema.parse(request.params.arguments);
+            return await getPromptDetail(this.client, args);
           }
 
           default:

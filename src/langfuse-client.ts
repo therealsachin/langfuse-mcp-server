@@ -232,6 +232,115 @@ export class LangfuseAnalyticsClient {
     return await response.json();
   }
 
+  async getHealthStatus(): Promise<any> {
+    const response = await fetch(`${this.config.baseUrl}/api/public/health`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Health API error: ${response.status} ${response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
+  async listModels(params: {
+    limit?: number;
+    page?: number;
+  }): Promise<any> {
+    const queryParams = new URLSearchParams();
+
+    if (params.limit) queryParams.append('limit', params.limit.toString());
+    if (params.page) queryParams.append('page', params.page.toString());
+
+    const authHeader = 'Basic ' + Buffer.from(
+      `${this.config.publicKey}:${this.config.secretKey}`
+    ).toString('base64');
+
+    const response = await fetch(`${this.config.baseUrl}/api/public/models?${queryParams}`, {
+      headers: {
+        'Authorization': authHeader,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Models API error: ${response.status} ${response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
+  async getModel(modelId: string): Promise<any> {
+    const authHeader = 'Basic ' + Buffer.from(
+      `${this.config.publicKey}:${this.config.secretKey}`
+    ).toString('base64');
+
+    const response = await fetch(`${this.config.baseUrl}/api/public/models/${modelId}`, {
+      headers: {
+        'Authorization': authHeader,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Model API error: ${response.status} ${response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
+  async listPrompts(params: {
+    limit?: number;
+    page?: number;
+    name?: string;
+  }): Promise<any> {
+    const queryParams = new URLSearchParams();
+
+    if (params.limit) queryParams.append('limit', params.limit.toString());
+    if (params.page) queryParams.append('page', params.page.toString());
+    if (params.name) queryParams.append('name', params.name);
+
+    const authHeader = 'Basic ' + Buffer.from(
+      `${this.config.publicKey}:${this.config.secretKey}`
+    ).toString('base64');
+
+    const response = await fetch(`${this.config.baseUrl}/api/public/prompts?${queryParams}`, {
+      headers: {
+        'Authorization': authHeader,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Prompts API error: ${response.status} ${response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
+  async getPrompt(promptName: string, version?: number, label?: string): Promise<any> {
+    const queryParams = new URLSearchParams();
+
+    if (version !== undefined) queryParams.append('version', version.toString());
+    if (label) queryParams.append('label', label);
+
+    const authHeader = 'Basic ' + Buffer.from(
+      `${this.config.publicKey}:${this.config.secretKey}`
+    ).toString('base64');
+
+    const url = `${this.config.baseUrl}/api/public/prompts/${encodeURIComponent(promptName)}?${queryParams}`;
+
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': authHeader,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Prompt API error: ${response.status} ${response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
   async shutdown(): Promise<void> {
     await this.client.shutdownAsync();
   }

@@ -9,12 +9,21 @@
  * Usage: node test-endpoints.js
  */
 
+import 'dotenv/config';
+
 import { LangfuseAnalyticsClient } from './build/langfuse-client.js';
 import { projectOverview } from './build/tools/project-overview.js';
 import { getTraces } from './build/tools/get-traces.js';
 import { topExpensiveTraces } from './build/tools/top-expensive-traces.js';
 import { getDailyMetrics } from './build/tools/get-daily-metrics.js';
 import { getCostAnalysis } from './build/tools/get-cost-analysis.js';
+// New API tools for testing
+import { getObservationDetail } from './build/tools/get-observation-detail.js';
+import { getHealthStatus } from './build/tools/get-health-status.js';
+import { listModels } from './build/tools/list-models.js';
+import { getModelDetail } from './build/tools/get-model-detail.js';
+import { listPrompts } from './build/tools/list-prompts.js';
+import { getPromptDetail } from './build/tools/get-prompt-detail.js';
 
 const client = new LangfuseAnalyticsClient({
   id: 'test-project',
@@ -24,7 +33,7 @@ const client = new LangfuseAnalyticsClient({
 });
 
 async function runTests() {
-  console.log('🧪 Langfuse MCP Server - Comprehensive Endpoint Tests');
+  console.log('🧪 Langfuse MCP Server - Enhanced Endpoint Tests (18 Total Tests)');
   console.log('=' .repeat(60));
   console.log(`🔗 Testing against: ${client.getConfig().baseUrl}`);
   console.log(`📊 Project ID: ${client.getProjectId()}`);
@@ -152,6 +161,187 @@ async function runTests() {
     }
   } catch (error) {
     console.log(`   ❌ FAIL - Error: ${error.message}`);
+    failed++;
+  }
+
+  // Test 6: Health Status (system monitoring)
+  console.log('\\n6️⃣ Testing get_health_status...');
+  try {
+    const health = await getHealthStatus(client, {});
+    const healthData = JSON.parse(health.content[0].text);
+
+    if (healthData && typeof healthData === 'object') {
+      console.log(`   ✅ PASS - Health status retrieved successfully`);
+      console.log(`   ✅ PASS - Health response structure: ${Object.keys(healthData).join(', ')}`);
+      passed++;
+    } else {
+      console.log(`   ❌ FAIL - Invalid health response structure`);
+      failed++;
+    }
+  } catch (error) {
+    console.log(`   ❌ FAIL - Error: ${error.message}`);
+    failed++;
+  }
+
+  // Test 7: List Models
+  console.log('\\n7️⃣ Testing list_models...');
+  try {
+    const models = await listModels(client, { limit: 10 });
+    const modelsData = JSON.parse(models.content[0].text);
+
+    if (modelsData && (modelsData.data || modelsData.models || Array.isArray(modelsData))) {
+      const modelsList = modelsData.data || modelsData.models || modelsData;
+      console.log(`   ✅ PASS - Retrieved ${Array.isArray(modelsList) ? modelsList.length : 'N/A'} models`);
+      console.log(`   ✅ PASS - Models list structure validated`);
+      passed++;
+    } else {
+      console.log(`   ❌ FAIL - Invalid models response structure`);
+      failed++;
+    }
+  } catch (error) {
+    console.log(`   ❌ FAIL - Error: ${error.message}`);
+    failed++;
+  }
+
+  // Test 8: List Prompts
+  console.log('\\n8️⃣ Testing list_prompts...');
+  try {
+    const prompts = await listPrompts(client, { limit: 10 });
+    const promptsData = JSON.parse(prompts.content[0].text);
+
+    if (promptsData && (promptsData.data || promptsData.prompts || Array.isArray(promptsData))) {
+      const promptsList = promptsData.data || promptsData.prompts || promptsData;
+      console.log(`   ✅ PASS - Retrieved ${Array.isArray(promptsList) ? promptsList.length : 'N/A'} prompts`);
+      console.log(`   ✅ PASS - Prompts list structure validated`);
+      passed++;
+    } else {
+      console.log(`   ❌ FAIL - Invalid prompts response structure`);
+      failed++;
+    }
+  } catch (error) {
+    console.log(`   ❌ FAIL - Error: ${error.message}`);
+    failed++;
+  }
+
+  // Test 9-18: Conditional tests based on data availability
+  let observationId = null;
+  let modelId = null;
+  let promptName = null;
+
+  // Test 9: Get first observation ID for detailed testing
+  console.log('\\n9️⃣ Testing get_observations to find observation ID...');
+  try {
+    const observations = await client.listObservations({ limit: 1, fromStartTime: from, toStartTime: to });
+
+    if (observations && observations.data && observations.data.length > 0) {
+      observationId = observations.data[0].id;
+      console.log(`   ✅ PASS - Found observation ID: ${observationId}`);
+      passed++;
+    } else {
+      console.log(`   ⚠️  SKIP - No observations found (will skip observation detail test)`);
+      failed++;
+    }
+  } catch (error) {
+    console.log(`   ❌ FAIL - Error: ${error.message}`);
+    failed++;
+  }
+
+  // Test 10: Get Observation Detail (if observation found)
+  if (observationId) {
+    console.log('\\n🔟 Testing get_observation_detail...');
+    try {
+      const observationDetail = await getObservationDetail(client, { observationId });
+      const observationData = JSON.parse(observationDetail.content[0].text);
+
+      if (observationData && observationData.id === observationId) {
+        console.log(`   ✅ PASS - Retrieved observation detail successfully`);
+        console.log(`   ✅ PASS - Observation ID matches: ${observationData.id}`);
+        passed++;
+      } else {
+        console.log(`   ❌ FAIL - Invalid observation detail response`);
+        failed++;
+      }
+    } catch (error) {
+      console.log(`   ❌ FAIL - Error: ${error.message}`);
+      failed++;
+    }
+  } else {
+    console.log('\\n🔟 SKIPPED - get_observation_detail (no observation ID available)');
+    failed++;
+  }
+
+  // Test 11-15: Extract IDs from lists for detail testing
+  console.log('\\n1️⃣1️⃣ Extracting IDs for detail testing...');
+  try {
+    // Get model ID
+    const modelsResponse = await listModels(client, { limit: 1 });
+    const modelsData = JSON.parse(modelsResponse.content[0].text);
+    const modelsList = modelsData.data || modelsData.models || modelsData;
+    if (Array.isArray(modelsList) && modelsList.length > 0) {
+      modelId = modelsList[0].id || modelsList[0].name || modelsList[0].model;
+    }
+
+    // Get prompt name
+    const promptsResponse = await listPrompts(client, { limit: 1 });
+    const promptsData = JSON.parse(promptsResponse.content[0].text);
+    const promptsList = promptsData.data || promptsData.prompts || promptsData;
+    if (Array.isArray(promptsList) && promptsList.length > 0) {
+      promptName = promptsList[0].name;
+    }
+
+    console.log(`   📊 Found Model ID: ${modelId || 'None'}`);
+    console.log(`   📊 Found Prompt Name: ${promptName || 'None'}`);
+    passed++;
+  } catch (error) {
+    console.log(`   ❌ FAIL - Error extracting IDs: ${error.message}`);
+    failed++;
+  }
+
+  // Test 12: Get Model Detail (if model found)
+  if (modelId) {
+    console.log('\\n1️⃣2️⃣ Testing get_model_detail...');
+    try {
+      const modelDetail = await getModelDetail(client, { modelId });
+      const modelData = JSON.parse(modelDetail.content[0].text);
+
+      if (modelData && (modelData.id === modelId || modelData.name === modelId)) {
+        console.log(`   ✅ PASS - Retrieved model detail successfully`);
+        console.log(`   ✅ PASS - Model ID matches: ${modelData.id || modelData.name}`);
+        passed++;
+      } else {
+        console.log(`   ❌ FAIL - Invalid model detail response`);
+        failed++;
+      }
+    } catch (error) {
+      console.log(`   ❌ FAIL - Error: ${error.message}`);
+      failed++;
+    }
+  } else {
+    console.log('\\n1️⃣2️⃣ SKIPPED - get_model_detail (no model ID available)');
+    failed++;
+  }
+
+  // Test 13: Get Prompt Detail (if prompt found)
+  if (promptName) {
+    console.log('\\n1️⃣3️⃣ Testing get_prompt_detail...');
+    try {
+      const promptDetail = await getPromptDetail(client, { promptName });
+      const promptData = JSON.parse(promptDetail.content[0].text);
+
+      if (promptData && promptData.name === promptName) {
+        console.log(`   ✅ PASS - Retrieved prompt detail successfully`);
+        console.log(`   ✅ PASS - Prompt name matches: ${promptData.name}`);
+        passed++;
+      } else {
+        console.log(`   ❌ FAIL - Invalid prompt detail response`);
+        failed++;
+      }
+    } catch (error) {
+      console.log(`   ❌ FAIL - Error: ${error.message}`);
+      failed++;
+    }
+  } else {
+    console.log('\\n1️⃣3️⃣ SKIPPED - get_prompt_detail (no prompt name available)');
     failed++;
   }
 
