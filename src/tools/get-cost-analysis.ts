@@ -121,9 +121,6 @@ export async function getCostAnalysis(
         filters,
       });
 
-      // DEBUG: Log the user response structure
-      console.log('DEBUG - User Response:', JSON.stringify(userResponse, null, 2));
-
       const userBreakdown: Array<{
         userId: string;
         cost: number;
@@ -132,13 +129,10 @@ export async function getCostAnalysis(
         percentage: number;
       }> = [];
       if (userResponse.data && Array.isArray(userResponse.data)) {
-        console.log('DEBUG - User response data length:', userResponse.data.length);
         userResponse.data.forEach((row: any, index: number) => {
-          console.log(`DEBUG - User row ${index}:`, JSON.stringify(row, null, 2));
           if (row.userId) {
             // Use correct field names from metrics API response
             const cost = row.totalCost_sum || 0;
-            console.log(`DEBUG - User ${row.userId} cost: ${cost} (from totalCost_sum: ${row.totalCost_sum})`);
             userBreakdown.push({
               userId: row.userId,
               cost,
@@ -148,8 +142,6 @@ export async function getCostAnalysis(
             });
           }
         });
-      } else {
-        console.log('DEBUG - No user data or not an array:', userResponse.data);
       }
 
       result.breakdown.byUser = userBreakdown

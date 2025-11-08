@@ -60,6 +60,43 @@ LANGFUSE_SECRET_KEY=sk-lf-xxx
 LANGFUSE_BASEURL=https://us.cloud.langfuse.com
 ```
 
+## 🔒 Security Best Practices
+
+**⚠️ IMPORTANT: Never commit real API credentials to version control!**
+
+### Secure Credential Management
+
+1. **Use Environment Variables**: Store credentials in environment variables, never hardcode them in source files
+2. **Use .env Files Locally**: Create a `.env` file for local development (already in `.gitignore`)
+3. **Use Placeholder Values**: In committed files, use placeholders like `pk-lf-your-public-key`
+4. **Rotate Keys Regularly**: Periodically generate new API keys in your Langfuse dashboard
+5. **Limit Key Permissions**: Use project-specific keys with minimal required permissions
+
+### What NOT to do:
+
+```bash
+# ❌ NEVER commit real credentials like this:
+LANGFUSE_PUBLIC_KEY=pk-lf-12345678-1234-1234-1234-123456789012
+LANGFUSE_SECRET_KEY=sk-lf-87654321-4321-4321-4321-210987654321
+```
+
+### What TO do:
+
+```bash
+# ✅ Use placeholder values in committed files:
+LANGFUSE_PUBLIC_KEY=pk-lf-your-actual-public-key
+LANGFUSE_SECRET_KEY=sk-lf-your-actual-secret-key
+
+# ✅ Store real credentials in .env file (never committed):
+# Create a .env file in your project root with your actual credentials
+```
+
+### For Production Deployments:
+
+- Use secure environment variable management (e.g., Kubernetes Secrets, Docker secrets, cloud provider secret managers)
+- Never include credentials in Docker images or CI/CD logs
+- Use least-privilege access principles
+
 ## Available Tools (18 Total)
 
 ### Core Analytics Tools (6)

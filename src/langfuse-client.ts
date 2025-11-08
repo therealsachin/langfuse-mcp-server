@@ -14,6 +14,17 @@ export class LangfuseAnalyticsClient {
     });
   }
 
+  /**
+   * Handles API errors securely by logging details server-side and returning generic client-side errors
+   */
+  private async handleApiError(response: Response, operation: string, url?: string): Promise<never> {
+    const errorText = await response.text().catch(() => 'Unable to read error response');
+    // Log detailed error information server-side for debugging
+    console.error(`${operation} API error: ${response.status} ${response.statusText}${url ? `. URL: ${url}` : ''}. Response: ${errorText.substring(0, 200)}`);
+    // Return generic error message to client to prevent information disclosure
+    throw new Error(`Failed to ${operation.toLowerCase()}: API returned status ${response.status}`);
+  }
+
   getProjectId(): string {
     return this.config.id;
   }
@@ -53,7 +64,7 @@ export class LangfuseAnalyticsClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Metrics API error: ${response.status} ${response.statusText}`);
+      await this.handleApiError(response, 'Metrics');
     }
 
     return await response.json();
@@ -112,9 +123,7 @@ export class LangfuseAnalyticsClient {
     });
 
     if (!response.ok) {
-      // Include more debugging information
-      const errorText = await response.text();
-      throw new Error(`Traces API error: ${response.status} ${response.statusText}. URL: ${url}. Response: ${errorText.substring(0, 200)}`);
+      await this.handleApiError(response, 'Traces', url);
     }
 
     return await response.json();
@@ -132,7 +141,7 @@ export class LangfuseAnalyticsClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Trace API error: ${response.status} ${response.statusText}`);
+      await this.handleApiError(response, 'Get Trace');
     }
 
     return await response.json();
@@ -176,7 +185,7 @@ export class LangfuseAnalyticsClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Observations API error: ${response.status} ${response.statusText}`);
+      await this.handleApiError(response, 'Observations');
     }
 
     return await response.json();
@@ -208,7 +217,7 @@ export class LangfuseAnalyticsClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Daily Metrics API error: ${response.status} ${response.statusText}`);
+      await this.handleApiError(response, 'Daily Metrics');
     }
 
     return await response.json();
@@ -226,7 +235,7 @@ export class LangfuseAnalyticsClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Observation API error: ${response.status} ${response.statusText}`);
+      await this.handleApiError(response, 'Get Observation');
     }
 
     return await response.json();
@@ -238,7 +247,7 @@ export class LangfuseAnalyticsClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Health API error: ${response.status} ${response.statusText}`);
+      await this.handleApiError(response, 'Health Check');
     }
 
     return await response.json();
@@ -264,7 +273,7 @@ export class LangfuseAnalyticsClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Models API error: ${response.status} ${response.statusText}`);
+      await this.handleApiError(response, 'List Models');
     }
 
     return await response.json();
@@ -282,7 +291,7 @@ export class LangfuseAnalyticsClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Model API error: ${response.status} ${response.statusText}`);
+      await this.handleApiError(response, 'Get Model');
     }
 
     return await response.json();
@@ -310,7 +319,7 @@ export class LangfuseAnalyticsClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Prompts API error: ${response.status} ${response.statusText}`);
+      await this.handleApiError(response, 'List Prompts');
     }
 
     return await response.json();
@@ -335,7 +344,7 @@ export class LangfuseAnalyticsClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Prompt API error: ${response.status} ${response.statusText}`);
+      await this.handleApiError(response, 'Get Prompt');
     }
 
     return await response.json();
