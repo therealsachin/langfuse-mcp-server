@@ -36,7 +36,7 @@
 
 ```bash
 # No installation needed - run directly with npx
-npx @therealsachin/langfuse-mcp
+npx @therealsachin/langfuse-mcp-server
 ```
 
 ### Option 2: Local Development
@@ -132,7 +132,7 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "langfuse-analytics": {
       "command": "npx",
-      "args": ["@therealsachin/langfuse-mcp"],
+      "args": ["@therealsachin/langfuse-mcp-server"],
       "env": {
         "LANGFUSE_PUBLIC_KEY": "pk-lf-xxx",
         "LANGFUSE_SECRET_KEY": "sk-lf-xxx",
@@ -228,16 +228,16 @@ The test suite (`npm run test`) will automatically load these credentials using 
 
 ```bash
 # Install and run directly with npx
-npx @therealsachin/langfuse-mcp
+npx @therealsachin/langfuse-mcp-server
 
 # Or install globally
-npm install -g @therealsachin/langfuse-mcp
+npm install -g @therealsachin/langfuse-mcp-server
 ```
 
 **Package Information:**
-- **Name:** `@therealsachin/langfuse-mcp`
+- **Name:** `@therealsachin/langfuse-mcp-server`
 - **Version:** 1.1.1
-- **NPM URL:** https://www.npmjs.com/package/@therealsachin/langfuse-mcp
+- **NPM URL:** https://www.npmjs.com/package/@therealsachin/langfuse-mcp-server
 
 ## Project Structure
 
