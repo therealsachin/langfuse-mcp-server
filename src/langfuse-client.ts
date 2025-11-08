@@ -303,7 +303,7 @@ export class LangfuseAnalyticsClient {
       `${this.config.publicKey}:${this.config.secretKey}`
     ).toString('base64');
 
-    const response = await fetch(`${this.config.baseUrl}/api/public/prompts?${queryParams}`, {
+    const response = await fetch(`${this.config.baseUrl}/api/public/v2/prompts?${queryParams}`, {
       headers: {
         'Authorization': authHeader,
       },
@@ -326,7 +326,7 @@ export class LangfuseAnalyticsClient {
       `${this.config.publicKey}:${this.config.secretKey}`
     ).toString('base64');
 
-    const url = `${this.config.baseUrl}/api/public/prompts/${encodeURIComponent(promptName)}?${queryParams}`;
+    const url = `${this.config.baseUrl}/api/public/v2/prompts/${encodeURIComponent(promptName)}?${queryParams}`;
 
     const response = await fetch(url, {
       headers: {
