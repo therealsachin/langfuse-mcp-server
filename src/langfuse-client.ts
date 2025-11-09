@@ -15,12 +15,44 @@ export class LangfuseAnalyticsClient {
   }
 
   /**
+   * Sanitizes URLs for logging to prevent sensitive data exposure
+   */
+  private sanitizeUrlForLogging(url: string): string {
+    try {
+      const urlObj = new URL(url);
+      // Only log the path and remove sensitive query parameters
+      const sanitizedParams = new URLSearchParams();
+
+      // Allow non-sensitive query parameters for debugging
+      const allowedParams = ['limit', 'page', 'view', 'orderBy', 'orderDirection'];
+      for (const [key, value] of urlObj.searchParams) {
+        if (allowedParams.includes(key)) {
+          sanitizedParams.set(key, value);
+        } else {
+          sanitizedParams.set(key, '[REDACTED]');
+        }
+      }
+
+      const queryString = sanitizedParams.toString();
+      return `${urlObj.pathname}${queryString ? '?' + queryString : ''}`;
+    } catch {
+      // If URL parsing fails, return a safe placeholder
+      return '/api/[INVALID_URL]';
+    }
+  }
+
+  /**
    * Handles API errors securely by logging details server-side and returning generic client-side errors
    */
   private async handleApiError(response: Response, operation: string, url?: string): Promise<never> {
     const errorText = await response.text().catch(() => 'Unable to read error response');
-    // Log detailed error information server-side for debugging
-    console.error(`${operation} API error: ${response.status} ${response.statusText}${url ? `. URL: ${url}` : ''}. Response: ${errorText.substring(0, 200)}`);
+
+    // Sanitize URL for secure logging
+    const sanitizedUrl = url ? this.sanitizeUrlForLogging(url) : '';
+
+    // Log detailed error information server-side for debugging (with sanitized URL)
+    console.error(`${operation} API error: ${response.status} ${response.statusText}${sanitizedUrl ? `. URL: ${sanitizedUrl}` : ''}. Response: [REDACTED for security]`);
+
     // Return generic error message to client to prevent information disclosure
     throw new Error(`Failed to ${operation.toLowerCase()}: API returned status ${response.status}`);
   }

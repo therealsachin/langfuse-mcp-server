@@ -12,6 +12,14 @@ export function getProjectConfig(): LangfuseProjectConfig {
     );
   }
 
+  // Security: Enforce HTTPS to prevent credentials being sent in plaintext
+  if (!baseUrl.startsWith('https://')) {
+    throw new Error(
+      `Security Error: LANGFUSE_BASEURL must use HTTPS protocol to protect credentials. ` +
+      `Got: ${baseUrl}. Please use https:// instead of http://`
+    );
+  }
+
   // Extract project name from public key prefix or use a default
   const projectId = publicKey.split('-')[2]?.substring(0, 8) || 'default';
 

@@ -4,12 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **Langfuse MCP (Model Context Protocol) Server v1.1.0** that provides 18 comprehensive APIs for Langfuse analytics, cost monitoring, and management. It acts as a typed facade over the Langfuse public APIs, enabling integration with Claude Desktop and other MCP clients.
+This is a **Langfuse MCP (Model Context Protocol) Server v1.4.2** that provides 32+ comprehensive APIs for Langfuse analytics, cost monitoring, and management. It acts as a typed facade over the Langfuse public APIs, enabling integration with Claude Desktop and other MCP clients.
 
-### Version 1.1.0 Features
-- **18 Total Tools**: Complete analytics, system management, and monitoring capabilities
-- **Enhanced Testing**: Dotenv integration with 13 comprehensive tests
-- **System Management**: Health monitoring, model management, prompt operations
+### Version 1.4.2 Features
+- **32+ Total Tools**: Complete analytics, system management, monitoring, dataset management, and comment collaboration
+- **Enhanced Security**: HTTPS validation, URL sanitization, and pre-commit credential protection
+- **Robust Testing**: Graceful handling of missing test data with comprehensive test suite
+- **Dual Mode System**: Readonly (default) and readwrite modes with explicit opt-in
 - **Comprehensive Documentation**: Organized docs/ folder with architecture guides
 
 ## Core Architecture
@@ -35,6 +36,55 @@ This is a **Langfuse MCP (Model Context Protocol) Server v1.1.0** that provides 
 ### Data Flow Pattern
 ```
 MCP Request → Zod Validation → Client API Call → Response Processing → MCP Response
+```
+
+## Security Architecture (New in v1.4.2)
+
+The MCP server implements multiple layers of security protection:
+
+### Built-in Security Features
+
+#### 1. HTTPS Enforcement (`src/config.ts`)
+- **Automatic validation** of `LANGFUSE_BASEURL` environment variable
+- **Runtime rejection** of HTTP URLs with descriptive error messages
+- **Prevents credential exposure** through plaintext transmission
+- **Implementation**: URL validation in `getProjectConfig()` function
+
+#### 2. URL Sanitization (`src/langfuse-client.ts`)
+- **Smart parameter filtering** in error logs to prevent credential leakage
+- **Preserves debugging information** while removing sensitive query parameters
+- **Automatic redaction** of unknown parameters marked as `[REDACTED]`
+- **Implementation**: `sanitizeUrlForLogging()` method used in all error handling
+
+#### 3. Pre-commit Security Hooks (`.husky/pre-commit`)
+- **Credential pattern detection** for Langfuse API keys (`pk-lf-*`, `sk-lf-*`)
+- **General secret scanning** for common credential patterns
+- **Build validation** ensures TypeScript compilation before commit
+- **Git integration** prevents accidental credential commits
+
+### Security Implementation Details
+
+```typescript
+// HTTPS Validation (config.ts)
+if (!baseUrl.startsWith('https://')) {
+  throw new Error(
+    `Security Error: LANGFUSE_BASEURL must use HTTPS protocol to protect credentials. ` +
+    `Got: ${baseUrl}. Please use https:// instead of http://`
+  );
+}
+
+// URL Sanitization (langfuse-client.ts)
+private sanitizeUrlForLogging(url: string): string {
+  const allowedParams = ['limit', 'page', 'view', 'orderBy', 'orderDirection'];
+  // Redact sensitive parameters, preserve debugging info
+}
+
+// Pre-commit Hook (.husky/pre-commit)
+# Check for Langfuse API keys
+if git diff --cached | grep -E '(pk-lf-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}|sk-lf-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})'; then
+  echo "❌ ERROR: Real Langfuse API credentials detected!"
+  exit 1
+fi
 ```
 
 ## Development Commands
@@ -166,16 +216,27 @@ const authHeader = 'Basic ' + Buffer.from(
 ## Testing and Validation
 
 ### Test Suite Structure
-- **13 Comprehensive Tests**: Covers all critical MCP tool functionality
+- **28 Total Tests**: Comprehensive coverage including analytics, system management, dataset operations, and comments
 - **Real Data Validation**: Tests run against actual Langfuse instance using dotenv
-- **Success Metrics**: High pass rate with real credentials (varies by data availability)
-- **Conditional Testing**: Some tests skip gracefully if no data available (e.g., observations, models, prompts)
+- **Graceful Data Handling**: Tests distinguish between code failures and missing test data
+- **Smart Test Categories**: Passed, Failed (actual bugs), and Skipped (missing data) tracking
+- **Robust Exit Codes**: Process exits successfully when functional tests pass (even with skipped data tests)
+
+### Test Robustness Features (Enhanced in v1.4.2)
+- **Missing Data Tolerance**: Tests skip gracefully when project has no data instead of failing
+- **Clear Test Categorization**:
+  - ✅ **Passed**: Functional tests that work correctly
+  - ❌ **Failed**: Actual code bugs that need fixing
+  - ⚠️ **Skipped**: Data-dependent tests that can't run (normal for empty projects)
+- **Pre-commit Integration**: Tests designed to pass in CI/CD even with empty test projects
+- **Developer-Friendly**: Clear messaging about what's expected vs actual failures
 
 ### Common Test Patterns
 - Load data from API to get IDs for detail tests
 - Validate response structure and data types
 - Check for non-zero values where expected
-- Handle graceful failures for missing data
+- **Skip instead of fail** when test data is unavailable (prevents pre-commit hook failures)
+- Clear error vs skip distinction for debugging
 
 ## Known Limitations
 

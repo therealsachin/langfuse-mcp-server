@@ -1,6 +1,6 @@
 # Langfuse MCP Server
 
-**Version 1.4.0** - A secure MCP server for Langfuse analytics with dual readonly/readwrite modes for safe operation.
+**Version 1.4.2** - A secure MCP server for Langfuse analytics with comprehensive security features and dual readonly/readwrite modes for safe operation.
 
 ## 🔒 Security-First Design (New in v1.4.0)
 
@@ -155,6 +155,36 @@ LANGFUSE_MCP_MODE=readwrite
 
 **⚠️ IMPORTANT: Never commit real API credentials to version control!**
 
+### Built-in Security Features (New in v1.4.2)
+
+This MCP server includes multiple layers of security protection:
+
+#### 🛡️ HTTPS Enforcement
+- **Automatic validation** ensures all connections use HTTPS protocol
+- **Prevents plaintext transmission** of credentials and sensitive data
+- **Runtime checks** reject any HTTP URLs with clear error messages
+- **Production safety** guarantees secure communication with Langfuse APIs
+
+#### 🔍 URL Sanitization
+- **Automatic redaction** of sensitive query parameters in error logs
+- **Information disclosure prevention** protects against credential leakage in logs
+- **Smart filtering** preserves debugging info while removing secrets
+- **Audit trail protection** keeps logs clean and compliant
+
+#### 🚨 Pre-commit Security Hooks
+- **Automated credential detection** prevents accidental commits of real API keys
+- **Langfuse-specific patterns** scan for `pk-lf-` and `sk-lf-` format keys
+- **General secret detection** catches common credential patterns
+- **Build validation** ensures code compiles before commit
+- **Git integration** uses Husky for seamless workflow integration
+
+To enable pre-commit hooks in your development environment:
+```bash
+npm install husky --save-dev
+npx husky install
+# Hooks are automatically configured - no manual setup needed!
+```
+
 ### Secure Credential Management
 
 1. **Use Environment Variables**: Store credentials in environment variables, never hardcode them in source files
@@ -167,8 +197,8 @@ LANGFUSE_MCP_MODE=readwrite
 
 ```bash
 # ❌ NEVER commit real credentials like this:
-LANGFUSE_PUBLIC_KEY=pk-lf-12345678-1234-1234-1234-123456789012
-LANGFUSE_SECRET_KEY=sk-lf-87654321-4321-4321-4321-210987654321
+LANGFUSE_PUBLIC_KEY=pk-lf-REAL-KEY-NEVER-COMMIT-THIS
+LANGFUSE_SECRET_KEY=sk-lf-REAL-SECRET-NEVER-COMMIT-THIS
 ```
 
 ### What TO do:

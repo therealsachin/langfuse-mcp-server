@@ -87,9 +87,51 @@ The Langfuse Metrics API expects POST requests to `/api/public/metrics` with:
 3. **Caching**: Frequent queries could benefit from response caching
 4. **Concurrent Requests**: Multiple tool calls may happen simultaneously
 
-## Security Notes
+## Security Notes (Enhanced in v1.4.2)
 
+### Credential Protection
 - API keys are kept server-side only
 - Environment variables should never be logged or exposed to clients
 - Basic Auth credentials are computed fresh for each request
 - No persistent storage of sensitive data
+
+### Built-in Security Features (New)
+
+#### HTTPS Enforcement
+- **Automatic validation** ensures `LANGFUSE_BASEURL` uses HTTPS protocol
+- **Runtime rejection** of HTTP URLs prevents plaintext credential transmission
+- **Error location**: `src/config.ts` - `getProjectConfig()` function
+- **Protection against**: Man-in-the-middle attacks and credential interception
+
+#### URL Sanitization
+- **Automatic redaction** of sensitive query parameters in error logs
+- **Smart filtering** preserves debugging info while removing secrets
+- **Implementation**: `sanitizeUrlForLogging()` method in `src/langfuse-client.ts`
+- **Protection against**: Information disclosure through log files
+
+#### Pre-commit Security Hooks
+- **Automated scanning** for Langfuse API key patterns (`pk-lf-*`, `sk-lf-*`)
+- **General credential detection** for common secret patterns
+- **Build validation** ensures TypeScript compilation before commits
+- **Location**: `.husky/pre-commit` script
+- **Protection against**: Accidental credential commits to version control
+
+### Security Implementation Details
+```typescript
+// HTTPS validation in src/config.ts
+if (!baseUrl.startsWith('https://')) {
+  throw new Error(`Security Error: LANGFUSE_BASEURL must use HTTPS protocol to protect credentials.`);
+}
+
+// URL sanitization in src/langfuse-client.ts
+private sanitizeUrlForLogging(url: string): string {
+  const allowedParams = ['limit', 'page', 'view', 'orderBy', 'orderDirection'];
+  // Redacts sensitive parameters while preserving debugging information
+}
+```
+
+### Security Best Practices
+1. **Never commit real credentials** - use placeholder values in code
+2. **Use .env files** for local development (already in `.gitignore`)
+3. **Rotate API keys regularly** in production environments
+4. **Enable pre-commit hooks** with `npx husky install`

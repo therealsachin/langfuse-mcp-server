@@ -44,6 +44,87 @@ npm run inspector
 
 ---
 
+## Security Features (New in v1.4.2)
+
+The MCP server includes built-in security protections that developers should understand:
+
+### Pre-commit Security Hooks
+
+**Automatic setup**: Pre-commit hooks are configured automatically via Husky.
+
+**What they protect against**:
+- Accidental commits of real API credentials
+- Langfuse API key patterns (`pk-lf-*` and `sk-lf-*`)
+- Common secret patterns (password, token, api_key, etc.)
+- `.env` files being committed
+
+**If pre-commit fails**:
+```bash
+# Example failure
+❌ ERROR: Real Langfuse API credentials detected in staged files!
+   Please remove them and use environment variables instead.
+```
+
+**How to fix**:
+1. Remove real credentials from staged files
+2. Use placeholder values like `pk-lf-your-public-key`
+3. Put real credentials in `.env` file (already in `.gitignore`)
+4. Commit again
+
+### HTTPS Validation
+
+**Automatic protection**: Server validates `LANGFUSE_BASEURL` must use HTTPS.
+
+**Example error**:
+```bash
+Security Error: LANGFUSE_BASEURL must use HTTPS protocol to protect credentials.
+Got: http://localhost:3000. Please use https:// instead of http://
+```
+
+**For local development**: Use HTTPS even for local Langfuse instances.
+
+### URL Sanitization
+
+**Automatic protection**: Error logs automatically redact sensitive query parameters.
+
+**Developer note**: When debugging API calls, logs will show sanitized URLs like:
+```
+/api/public/traces?limit=10&orderBy=totalCost&sessionId=[REDACTED]
+```
+
+This prevents credentials from leaking into log files while preserving debugging information.
+
+### Security Best Practices for Developers
+
+1. **Never commit real credentials**:
+   ```bash
+   # ❌ Wrong - Never do this!
+   LANGFUSE_PUBLIC_KEY=pk-lf-REAL-KEY-WOULD-GO-HERE
+
+   # ✅ Correct - Use placeholder values
+   LANGFUSE_PUBLIC_KEY=pk-lf-your-actual-public-key
+   ```
+
+2. **Use .env for local development**:
+   ```bash
+   # Create .env file (never committed)
+   echo "LANGFUSE_PUBLIC_KEY=pk-lf-your-real-key" > .env
+   echo "LANGFUSE_SECRET_KEY=sk-lf-your-real-key" >> .env
+   ```
+
+3. **Test security features**:
+   ```bash
+   # Test HTTPS validation
+   LANGFUSE_BASEURL=http://insecure.com npm run build
+
+   # Test pre-commit hooks (will intentionally fail)
+   echo "pk-lf-EXAMPLE-KEY-PATTERN-HERE" > test.txt
+   git add test.txt
+   git commit -m "test" # Should fail and prevent commit
+   ```
+
+---
+
 ## Common Development Tasks
 
 ### Task 1: Add a New MCP Tool

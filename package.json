@@ -15,7 +15,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
-    "prepare": "npm run build",
+    "prepare": "husky",
     "dev": "tsc --watch",
     "inspector": "node build/index.js",
     "test": "node test-endpoints.js",
@@ -49,6 +49,7 @@
   "devDependencies": {
     "@types/node": "^22.10.2",
     "dotenv": "^17.2.3",
+    "husky": "^9.1.7",
     "typescript": "^5.7.2"
   }
 }
