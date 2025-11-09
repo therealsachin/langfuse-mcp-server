@@ -1,11 +1,11 @@
 {
-  "name": "@therealsachin/langfuse-mcp-server",
-  "version": "1.4.1",
+  "name": "@therealsachin/langfuse-mcp",
+  "version": "1.4.2",
   "description": "MCP server for Langfuse analytics and cost monitoring with readonly/readwrite modes via CLI flags for secure npx deployment",
   "type": "module",
   "main": "build/index.js",
   "bin": {
-    "langfuse-mcp-server": "build/index.js"
+    "langfuse-mcp": "build/index.js"
   },
   "files": [
     "build/**/*",

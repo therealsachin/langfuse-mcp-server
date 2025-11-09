@@ -32,7 +32,7 @@
 
 🛠️ **Enhanced Functionality**:
 - 32+ tools across analytics, dataset management, and collaboration
-- Dual CLI entrypoints: `langfuse-mcp-ro` and `langfuse-mcp-server`
+- Single CLI binary with intuitive mode flags: `langfuse-mcp`
 - Legacy tool support during transition period
 - Mode-aware tool filtering and descriptions
 
@@ -49,7 +49,7 @@
 **Read-Only Mode (Safe Default):**
 ```bash
 # Only analytics and read operations - safe for most users
-npx @therealsachin/langfuse-mcp-server
+npx @therealsachin/langfuse-mcp
 # OR explicitly use readonly binary
 langfuse-mcp-ro
 ```
@@ -57,9 +57,9 @@ langfuse-mcp-ro
 **Read-Write Mode (Explicit Opt-in):**
 ```bash
 # ⚠️ Enables write operations - can modify your Langfuse data
-LANGFUSE_MCP_MODE=readwrite npx @therealsachin/langfuse-mcp-server
-# OR use readwrite binary
-langfuse-mcp-server
+LANGFUSE_MCP_MODE=readwrite npx @therealsachin/langfuse-mcp
+# OR use CLI flag
+langfuse-mcp --readwrite
 ```
 
 ### Option 2: Local Development
@@ -96,14 +96,14 @@ Control server operation mode using CLI flags or environment variables:
 **CLI Flags (Recommended for npx usage):**
 ```bash
 # Read-only mode (default, safe)
-npx @therealsachin/langfuse-mcp-server
+npx @therealsachin/langfuse-mcp
 
 # Read-write mode (explicit opt-in)
-npx @therealsachin/langfuse-mcp-server --readwrite
+npx @therealsachin/langfuse-mcp --readwrite
 
 # Alternative explicit flag syntax
-npx @therealsachin/langfuse-mcp-server --mode=readonly
-npx @therealsachin/langfuse-mcp-server --mode=readwrite
+npx @therealsachin/langfuse-mcp --mode=readonly
+npx @therealsachin/langfuse-mcp --mode=readwrite
 ```
 
 **Environment Variables (Legacy support):**
@@ -123,7 +123,7 @@ LANGFUSE_MCP_MODE=readwrite
   "mcpServers": {
     "langfuse": {
       "command": "npx",
-      "args": ["@therealsachin/langfuse-mcp-server"],
+      "args": ["@therealsachin/langfuse-mcp"],
       "env": {
         "LANGFUSE_PUBLIC_KEY": "pk-lf-your-key",
         "LANGFUSE_SECRET_KEY": "sk-lf-your-secret",
@@ -140,7 +140,7 @@ LANGFUSE_MCP_MODE=readwrite
   "mcpServers": {
     "langfuse": {
       "command": "npx",
-      "args": ["@therealsachin/langfuse-mcp-server", "--readwrite"],
+      "args": ["@therealsachin/langfuse-mcp", "--readwrite"],
       "env": {
         "LANGFUSE_PUBLIC_KEY": "pk-lf-your-key",
         "LANGFUSE_SECRET_KEY": "sk-lf-your-secret",
@@ -225,7 +225,7 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "langfuse-analytics": {
       "command": "npx",
-      "args": ["@therealsachin/langfuse-mcp-server"],
+      "args": ["@therealsachin/langfuse-mcp"],
       "env": {
         "LANGFUSE_PUBLIC_KEY": "pk-lf-xxx",
         "LANGFUSE_SECRET_KEY": "sk-lf-xxx",
@@ -321,16 +321,16 @@ The test suite (`npm run test`) will automatically load these credentials using 
 
 ```bash
 # Install and run directly with npx
-npx @therealsachin/langfuse-mcp-server
+npx @therealsachin/langfuse-mcp
 
 # Or install globally
-npm install -g @therealsachin/langfuse-mcp-server
+npm install -g @therealsachin/langfuse-mcp
 ```
 
 **Package Information:**
-- **Name:** `@therealsachin/langfuse-mcp-server`
+- **Name:** `@therealsachin/langfuse-mcp`
 - **Version:** 1.1.1
-- **NPM URL:** https://www.npmjs.com/package/@therealsachin/langfuse-mcp-server
+- **NPM URL:** https://www.npmjs.com/package/@therealsachin/langfuse-mcp
 
 ## Project Structure
 

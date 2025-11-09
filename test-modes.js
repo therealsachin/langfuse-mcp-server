@@ -32,7 +32,7 @@ async function testModeSystem() {
   console.log('   • Write tool prefixing (write_create_dataset, etc.)');
   console.log('   • Confirmation prompts for destructive operations');
   console.log('   • Comprehensive audit logging for write operations');
-  console.log('   • Dual CLI entrypoints (langfuse-mcp-ro, langfuse-mcp-server)');
+  console.log('   • Single CLI entrypoint with mode flags (langfuse-mcp)');
   console.log('   • Mode-aware tool filtering and descriptions');
 }
 
@@ -92,7 +92,7 @@ async function testBinaryEntrypoints() {
     if (roExists && rwExists) {
       console.log('   ✅ Both CLI entrypoints built successfully');
       console.log('   ✅ langfuse-mcp-ro → readonly mode');
-      console.log('   ✅ langfuse-mcp-server → readwrite mode');
+      console.log('   ✅ langfuse-mcp → single binary with mode flags');
     } else {
       console.log('   ❌ CLI entrypoints not found');
     }
